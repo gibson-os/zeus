@@ -15,6 +15,9 @@ use GibsonOS\Module\Zeus\Repository\PriceRepository;
 use Override;
 use Psr\Log\LoggerInterface;
 
+/**
+ * @description Collect prices from Tibber API
+ */
 #[Lock('zeusCollectPrices')]
 #[Cronjob(minutes: '1,16,31,46', seconds: '21')]
 class CollectPricesCommand extends AbstractCommand

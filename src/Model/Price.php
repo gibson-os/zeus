@@ -9,6 +9,8 @@ use GibsonOS\Core\Attribute\Install\Database\Constraint;
 use GibsonOS\Core\Attribute\Install\Database\Key;
 use GibsonOS\Core\Attribute\Install\Database\Table;
 use GibsonOS\Core\Model\AbstractModel;
+use JsonSerializable;
+use Override;
 
 /**
  * @method Home  getHome()
@@ -16,7 +18,7 @@ use GibsonOS\Core\Model\AbstractModel;
  */
 #[Table]
 #[Key(true, ['starts_at', 'home_id'])]
-class Price extends AbstractModel
+class Price extends AbstractModel implements JsonSerializable
 {
     #[Column(attributes: [Column::ATTRIBUTE_UNSIGNED], autoIncrement: true)]
     private ?int $id = null;
@@ -124,5 +126,17 @@ class Price extends AbstractModel
         $this->current = $current;
 
         return $this;
+    }
+
+    #[Override]
+    public function jsonSerialize(): array
+    {
+        return [
+            'id' => $this->getId(),
+            'total' => $this->getTotal(),
+            'energy' => $this->getEnergy(),
+            'tax' => $this->getTax(),
+            'startsAt' => $this->getStartsAt()->format('Y-m-d H:i:s'),
+        ];
     }
 }
