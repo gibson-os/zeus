@@ -1,6 +1,8 @@
 <?php
 declare(strict_types=1);
 
+namespace GibsonOS\Module\Zeus\Provider;
+
 use GibsonOS\Core\Attribute\GetEnv;
 use GibsonOS\Core\Dto\Web\Body;
 use GibsonOS\Core\Dto\Web\Request;
@@ -9,7 +11,7 @@ use GibsonOS\Core\Mapper\GraphQlQueryMapper;
 use GibsonOS\Core\Mapper\ModelMapper;
 use GibsonOS\Core\Service\WebService;
 use GibsonOS\Core\Utility\JsonUtility;
-use Model\Price;
+use GibsonOS\Module\Zeus\Model\Price;
 
 class TibberProvider
 {

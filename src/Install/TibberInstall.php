@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Install;
+namespace GibsonOS\Module\Zeus\Install;
 
 use Generator;
 use GibsonOS\Core\Dto\Install\Configuration;

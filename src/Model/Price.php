@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Model;
+namespace GibsonOS\Module\Zeus\Model;
 
 use DateTime;
 use GibsonOS\Core\Attribute\Install\Database\Column;
