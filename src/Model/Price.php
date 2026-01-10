@@ -5,24 +5,42 @@ namespace GibsonOS\Module\Zeus\Model;
 
 use DateTime;
 use GibsonOS\Core\Attribute\Install\Database\Column;
+use GibsonOS\Core\Attribute\Install\Database\Constraint;
+use GibsonOS\Core\Attribute\Install\Database\Key;
 use GibsonOS\Core\Attribute\Install\Database\Table;
 use GibsonOS\Core\Model\AbstractModel;
 
+/**
+ * @method Home  getHome()
+ * @method Price setHome(Home $home)
+ */
 #[Table]
+#[Key(true, ['starts_at', 'home_id'])]
 class Price extends AbstractModel
 {
     #[Column(attributes: [Column::ATTRIBUTE_UNSIGNED], autoIncrement: true)]
     private ?int $id = null;
 
+    #[Column(attributes: [Column::ATTRIBUTE_UNSIGNED])]
+    private int $homeId;
+
+    #[Column(type: 'double')]
     private float $total;
 
+    #[Column(type: 'double')]
     private float $energy;
 
+    #[Column(type: 'double')]
     private float $tax;
 
+    #[Column]
     private DateTime $startsAt;
 
+    #[Column]
     private bool $current = false;
+
+    #[Constraint]
+    protected Home $home;
 
     public function getId(): ?int
     {
@@ -32,6 +50,18 @@ class Price extends AbstractModel
     public function setId(?int $id): Price
     {
         $this->id = $id;
+
+        return $this;
+    }
+
+    public function getHomeId(): int
+    {
+        return $this->homeId;
+    }
+
+    public function setHomeId(int $homeId): Price
+    {
+        $this->homeId = $homeId;
 
         return $this;
     }
