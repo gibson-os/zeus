@@ -8,6 +8,7 @@ use GibsonOS\Core\Attribute\Install\Database\Constraint;
 use GibsonOS\Core\Attribute\Install\Database\Key;
 use GibsonOS\Core\Attribute\Install\Database\Table;
 use GibsonOS\Core\Model\AbstractModel;
+use GibsonOS\Core\Model\AutoCompleteModelInterface;
 use JsonSerializable;
 use Override;
 
@@ -18,7 +19,7 @@ use Override;
  */
 #[Table]
 #[Key(true, ['access_token', 'foreign_id'])]
-class Home extends AbstractModel implements JsonSerializable
+class Home extends AbstractModel implements JsonSerializable, AutoCompleteModelInterface
 {
     #[Column(attributes: [Column::ATTRIBUTE_UNSIGNED], autoIncrement: true)]
     private ?int $id = null;
@@ -126,5 +127,11 @@ class Home extends AbstractModel implements JsonSerializable
             'residents' => $this->getResidents(),
             'size' => $this->getSize(),
         ];
+    }
+
+    #[Override]
+    public function getAutoCompleteId(): int
+    {
+        return $this->getId() ?? 0;
     }
 }
