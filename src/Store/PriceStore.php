@@ -40,4 +40,16 @@ class PriceStore extends AbstractDatabaseStore
     {
         return ['`starts_at`' => OrderDirection::DESC];
     }
+
+    #[Override]
+    protected function getOrderMapping(): array
+    {
+        return [
+            'startsAt' => '`starts_at`',
+            'endsAt' => '`ends_at`',
+            'total' => '`total`',
+            'energy' => '`energy`',
+            'tax' => '`tax`',
+        ];
+    }
 }

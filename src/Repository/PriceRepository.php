@@ -64,7 +64,8 @@ class PriceRepository extends AbstractRepository
         int $limit = 1,
     ): array {
         return $this->fetchAll(
-            '`home_id`=:homeId AND `starts_at` BETWEEN :from AND :to',
+            '`home_id`=:homeId AND ' .
+            '(`starts_at` BETWEEN :from AND :to OR IFNULL(`ends_at`, NOW()) BETWEEN :from AND :to)',
             [
                 'homeId' => $homeId,
                 'from' => $from->format('Y-m-d H:i:s'),

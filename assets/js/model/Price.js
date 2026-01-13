@@ -15,5 +15,8 @@ Ext.define('GibsonOS.module.zeus.model.Price', {
     },{
         name: 'startsAt',
         type: 'string'
+    },{
+        name: 'endsAt',
+        type: 'string'
     }]
 });

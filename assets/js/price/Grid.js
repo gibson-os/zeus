@@ -15,8 +15,12 @@ Ext.define('GibsonOS.module.zeus.price.Grid', {
     },
     getColumns() {
         return [{
-            header: 'Zeit',
+            header: 'Von',
             dataIndex: 'startsAt',
+            flex: 1
+        },{
+            header: 'Bis',
+            dataIndex: 'endsAt',
             flex: 1
         },{
             header: 'Preis Total',
