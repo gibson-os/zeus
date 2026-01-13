@@ -168,7 +168,7 @@ class TibberPriceCollector
         ksort($prices);
 
         foreach ($prices as $price) {
-            if ($last !== null) {
+            if ($last !== null && $last->getStartsAt() < $price->getStartsAt()) {
                 $last->setEndsAt($price->getStartsAt());
                 $this->modelWrapper->getModelManager()->saveWithoutChildren($last);
             }
