@@ -39,6 +39,9 @@ class Price extends AbstractModel implements JsonSerializable
     private DateTime $startsAt;
 
     #[Column]
+    private ?DateTime $endsAt = null;
+
+    #[Column]
     private bool $current = false;
 
     #[Constraint]
@@ -116,6 +119,18 @@ class Price extends AbstractModel implements JsonSerializable
         return $this;
     }
 
+    public function getEndsAt(): ?DateTime
+    {
+        return $this->endsAt;
+    }
+
+    public function setEndsAt(?DateTime $endsAt): Price
+    {
+        $this->endsAt = $endsAt;
+
+        return $this;
+    }
+
     public function isCurrent(): bool
     {
         return $this->current;
@@ -137,6 +152,7 @@ class Price extends AbstractModel implements JsonSerializable
             'energy' => $this->getEnergy(),
             'tax' => $this->getTax(),
             'startsAt' => $this->getStartsAt()->format('Y-m-d H:i:s'),
+            'endsAt' => $this->getEndsAt()?->format('Y-m-d H:i:s'),
         ];
     }
 }
