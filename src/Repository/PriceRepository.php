@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace GibsonOS\Module\Zeus\Repository;
 
+use DateTime;
 use DateTimeInterface;
 use GibsonOS\Core\Exception\Repository\SelectError;
 use GibsonOS\Core\Repository\AbstractRepository;
@@ -58,7 +59,7 @@ class PriceRepository extends AbstractRepository
      * @return Price[]
      */
     public function getBestPrices(
-        int $homeId,
+        Home $home,
         DateTimeInterface $from,
         DateTimeInterface $to,
         int $limit = 1,
@@ -67,7 +68,7 @@ class PriceRepository extends AbstractRepository
             '`home_id`=:homeId AND ' .
             '(`starts_at` BETWEEN :from AND :to OR IFNULL(`ends_at`, NOW()) BETWEEN :from AND :to)',
             [
-                'homeId' => $homeId,
+                'homeId' => $home->getId() ?? 0,
                 'from' => $from->format('Y-m-d H:i:s'),
                 'to' => $to->format('Y-m-d H:i:s'),
             ],
@@ -75,5 +76,36 @@ class PriceRepository extends AbstractRepository
             $limit,
             orderBy: ['price' => OrderDirection::ASC],
         );
+    }
+
+    public function getAveragePrice(
+        Home $home,
+        DateTime $from,
+        DateTime $to,
+    ): Price {
+        $record = $this->getAggregations(
+            [
+                'averageTotal' => 'AVG(`total`)',
+                'averageEnergy' => 'AVG(`energy`)',
+                'averageTax' => 'AVG(`tax`)',
+            ],
+            Price::class,
+            '`home_id`=:homeId AND ' .
+            '(`starts_at` BETWEEN :from AND :to OR IFNULL(`ends_at`, NOW()) BETWEEN :from AND :to)',
+            [
+                'homeId' => $home->getId() ?? 0,
+                'from' => $from->format('Y-m-d H:i:s'),
+                'to' => $to->format('Y-m-d H:i:s'),
+            ],
+        );
+
+        return new Price($this->getRepositoryWrapper()->getModelWrapper())
+            ->setHome($home)
+            ->setStartsAt($from)
+            ->setEndsAt($to)
+            ->setTotal((float) $record->get('averageTotal')->getValue())
+            ->setEnergy((float) $record->get('averageEnergy')->getValue())
+            ->setTax((float) $record->get('averageTax')->getValue())
+        ;
     }
 }
