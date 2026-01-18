@@ -70,10 +70,12 @@ class TibberClient
         $response = $this->request($accessToken, [
             'viewer' => [
                 'homes' => [
-                    'id',
                     'appNickname',
                     'size',
                     'numberOfResidents',
+                    'meteringPointData' => [
+                        'consumptionEan',
+                    ],
                     'currentSubscription' => [
                         'priceInfo' => [
                             'current' => $priceInfoQuery,

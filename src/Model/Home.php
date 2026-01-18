@@ -13,12 +13,15 @@ use JsonSerializable;
 use Override;
 
 /**
- * @method Price[] getPrices()
- * @method Home    setPrices(Price[] $prices)
- * @method Home    addPrices(Price[] $prices)
+ * @method Price[]       getPrices()
+ * @method Home          setPrices(Price[] $prices)
+ * @method Home          addPrices(Price[] $prices)
+ * @method Measurement[] getMeasurements()
+ * @method Home          setMeasurements(Measurement[] $prices)
+ * @method Home          addMeasurements(Measurement[] $prices)
  */
 #[Table]
-#[Key(true, ['access_token', 'foreign_id'])]
+#[Key(true, ['access_token', 'metering_point_ean'])]
 class Home extends AbstractModel implements JsonSerializable, AutoCompleteModelInterface
 {
     #[Column(attributes: [Column::ATTRIBUTE_UNSIGNED], autoIncrement: true)]
@@ -29,7 +32,11 @@ class Home extends AbstractModel implements JsonSerializable, AutoCompleteModelI
 
     #[Column(length: 64)]
     #[Key(true)]
-    private string $foreignId;
+    private ?string $meteringPointEan = null;
+
+    #[Column(length: 64)]
+    #[Key(true)]
+    private ?string $meteringPointId = null;
 
     #[Column(length: 64)]
     private string $name;
@@ -40,11 +47,32 @@ class Home extends AbstractModel implements JsonSerializable, AutoCompleteModelI
     #[Column(attributes: [Column::ATTRIBUTE_UNSIGNED])]
     private int $size = 0;
 
+    #[Column(length: 64)]
+    private ?string $street = null;
+
+    #[Column(length: 6)]
+    private ?string $streetNumber = null;
+
+    #[Column(length: 16)]
+    private ?string $postalCode = null;
+
+    #[Column(length: 64)]
+    private ?string $city = null;
+
+    #[Column(length: 2)]
+    private ?string $country = null;
+
     /**
      * @var Price[]
      */
-    #[Constraint('home_id', Price::class)]
+    #[Constraint('home', Price::class)]
     protected array $prices = [];
+
+    /**
+     * @var Measurement[]
+     */
+    #[Constraint('home', Measurement::class)]
+    protected array $measurements = [];
 
     public function getId(): ?int
     {
@@ -66,18 +94,6 @@ class Home extends AbstractModel implements JsonSerializable, AutoCompleteModelI
     public function setAccessToken(string $accessToken): Home
     {
         $this->accessToken = $accessToken;
-
-        return $this;
-    }
-
-    public function getForeignId(): string
-    {
-        return $this->foreignId;
-    }
-
-    public function setForeignId(string $foreignId): Home
-    {
-        $this->foreignId = $foreignId;
 
         return $this;
     }
@@ -118,6 +134,90 @@ class Home extends AbstractModel implements JsonSerializable, AutoCompleteModelI
         return $this;
     }
 
+    public function getStreet(): ?string
+    {
+        return $this->street;
+    }
+
+    public function setStreet(?string $street): Home
+    {
+        $this->street = $street;
+
+        return $this;
+    }
+
+    public function getStreetNumber(): ?string
+    {
+        return $this->streetNumber;
+    }
+
+    public function setStreetNumber(?string $streetNumber): Home
+    {
+        $this->streetNumber = $streetNumber;
+
+        return $this;
+    }
+
+    public function getPostalCode(): ?string
+    {
+        return $this->postalCode;
+    }
+
+    public function setPostalCode(?string $postalCode): Home
+    {
+        $this->postalCode = $postalCode;
+
+        return $this;
+    }
+
+    public function getCity(): ?string
+    {
+        return $this->city;
+    }
+
+    public function setCity(?string $city): Home
+    {
+        $this->city = $city;
+
+        return $this;
+    }
+
+    public function getCountry(): ?string
+    {
+        return $this->country;
+    }
+
+    public function setCountry(?string $country): Home
+    {
+        $this->country = $country;
+
+        return $this;
+    }
+
+    public function getMeteringPointEan(): ?string
+    {
+        return $this->meteringPointEan;
+    }
+
+    public function setMeteringPointEan(?string $meteringPointEan): Home
+    {
+        $this->meteringPointEan = $meteringPointEan;
+
+        return $this;
+    }
+
+    public function getMeteringPointId(): ?string
+    {
+        return $this->meteringPointId;
+    }
+
+    public function setMeteringPointId(?string $meteringPointId): Home
+    {
+        $this->meteringPointId = $meteringPointId;
+
+        return $this;
+    }
+
     #[Override]
     public function jsonSerialize(): array
     {
@@ -126,6 +226,12 @@ class Home extends AbstractModel implements JsonSerializable, AutoCompleteModelI
             'name' => $this->getName(),
             'residents' => $this->getResidents(),
             'size' => $this->getSize(),
+            'street' => $this->getStreet(),
+            'streetNumber' => $this->getStreetNumber(),
+            'postalCode' => $this->getPostalCode(),
+            'city' => $this->getCity(),
+            'country' => $this->getCountry(),
+            'meteringPointEan' => $this->getMeteringPointEan(),
         ];
     }
 

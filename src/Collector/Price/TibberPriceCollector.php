@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace GibsonOS\Module\Zeus\Collector\Price;
 
+use GibsonOS\Core\Exception\CryptException;
 use GibsonOS\Core\Exception\FactoryError;
 use GibsonOS\Core\Exception\MapperException;
 use GibsonOS\Core\Exception\Model\SaveError;
@@ -10,6 +11,7 @@ use GibsonOS\Core\Exception\Repository\SelectError;
 use GibsonOS\Core\Exception\ViolationException;
 use GibsonOS\Core\Exception\WebException;
 use GibsonOS\Core\Mapper\ModelMapper;
+use GibsonOS\Core\Service\CryptService;
 use GibsonOS\Core\Wrapper\ModelWrapper;
 use GibsonOS\Module\Zeus\Client\TibberClient;
 use GibsonOS\Module\Zeus\Model\Home;
@@ -27,6 +29,7 @@ class TibberPriceCollector
         private readonly ModelMapper $modelMapper,
         private readonly ModelWrapper $modelWrapper,
         private readonly PriceRepository $priceRepository,
+        private readonly CryptService $cryptService,
     ) {
     }
 
@@ -40,15 +43,17 @@ class TibberPriceCollector
      * @throws ViolationException
      * @throws RecordException
      * @throws ClientException
+     * @throws CryptException
      */
-    public function collectPrices(string $accessToken): void
+    public function collectPrices(string $cryptedAccessToken): void
     {
+        $accessToken = $this->cryptService->decrypt($cryptedAccessToken);
         $responseBody = $this->tibberClient->getPrices($accessToken);
         $homes = $this->collectHomes($accessToken, $responseBody['data']['viewer']['homes'] ?? []);
 
         /** @var array $home */
         foreach ($responseBody['data']['viewer']['homes'] ?? [] as $home) {
-            $homeId = $home['id'] ?? null;
+            $homeId = $home['meteringPointData']['consumptionEan'] ?? null;
 
             if (!is_string($homeId)) {
                 continue;
@@ -81,14 +86,14 @@ class TibberPriceCollector
 
         foreach ($homes as $home) {
             $homeModel = new Home($this->modelWrapper)
-                ->setForeignId($home['id'])
                 ->setAccessToken($accessToken)
                 ->setName($home['appNickname'])
-                ->setSize($home['size'])
-                ->setResidents($home['numberOfResidents'])
+                ->setSize($home['size'] ?? 0)
+                ->setResidents($home['numberOfResidents'] ?? 1)
+                ->setMeteringPointEan($home['meteringPointData']['consumptionEan'] ?? null)
             ;
             $this->modelWrapper->getModelManager()->saveWithoutChildren($homeModel);
-            $homeModels[$home['id']] = $homeModel;
+            $homeModels[$home['meteringPointData']['consumptionEan']] = $homeModel;
         }
 
         return $homeModels;
@@ -174,6 +179,10 @@ class TibberPriceCollector
             }
 
             $last = $price;
+        }
+
+        if ($last !== null) {
+            $this->modelWrapper->getModelManager()->saveWithoutChildren($last);
         }
     }
 }

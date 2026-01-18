@@ -18,6 +18,7 @@ use Override;
  */
 #[Table]
 #[Key(true, ['starts_at', 'home_id'])]
+#[Key(true, ['ends_at', 'home_id'])]
 class Price extends AbstractModel implements JsonSerializable
 {
     #[Column(attributes: [Column::ATTRIBUTE_UNSIGNED], autoIncrement: true)]

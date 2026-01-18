@@ -8,51 +8,73 @@ use GibsonOS\Core\Dto\Form\Button;
 use GibsonOS\Core\Dto\Parameter\AbstractParameter;
 use GibsonOS\Core\Dto\Parameter\StringParameter;
 use GibsonOS\Core\Model\Setting;
+use GibsonOS\Core\Service\CryptService;
 
 class SettingsForm
 {
-    public function __construct()
-    {
+    public function __construct(
+        private readonly CryptService $cryptService,
+    ) {
     }
 
-    public function getForm(?Setting $setting): Form
-    {
+    public function getForm(
+        ?Setting $tibberAccessToken,
+        ?Setting $inexogyEmail,
+        ?Setting $inexogyPassword,
+    ): Form {
         return new Form(
-            $this->getFields($setting),
-            $this->getButtons($setting),
+            $this->getFields($tibberAccessToken, $inexogyEmail, $inexogyPassword),
+            $this->getButtons(),
         );
     }
 
     /**
      * @return array<string, AbstractParameter>
      */
-    private function getFields(?Setting $setting): array
-    {
+    private function getFields(
+        ?Setting $tibberAccessTokenSetting,
+        ?Setting $inexogyEmailSetting,
+        ?Setting $inexogyPasswordSetting,
+    ): array {
+        $tibberAccessToken = $tibberAccessTokenSetting?->getValue();
+
+        if ($tibberAccessToken !== null) {
+            $tibberAccessToken = $this->cryptService->decrypt($tibberAccessToken);
+        }
+
+        $inexogyEmail = $inexogyEmailSetting?->getValue();
+
+        if ($inexogyEmail !== null) {
+            $inexogyEmail = $this->cryptService->decrypt($inexogyEmail);
+        }
+
+        $inexogyPassword = $inexogyPasswordSetting?->getValue();
+
+        if ($inexogyPassword !== null) {
+            $inexogyPassword = $this->cryptService->decrypt($inexogyPassword);
+        }
+
         return [
             'tibberAccessToken' => (new StringParameter('Tibber Access Token'))
-                ->setValue($setting?->getValue()),
+                ->setValue($tibberAccessToken),
+            'inexogyEmail' => (new StringParameter('Ineoxgy Email'))
+                ->setValue($inexogyEmail),
+            'inexogyPassword' => (new StringParameter('Ineoxgy Password'))
+                ->setValue($inexogyPassword),
         ];
     }
 
     /**
      * @return array<string, Button>
      */
-    private function getButtons(?Setting $setting): array
+    private function getButtons(): array
     {
-        $parameters = [];
-        $id = $setting?->getId();
-
-        if ($id !== null) {
-            $parameters['id'] = $id;
-        }
-
         return [
             'save' => new Button(
                 'Speichern',
                 'zeus',
                 'index',
                 'settings',
-                $parameters,
             ),
         ];
     }

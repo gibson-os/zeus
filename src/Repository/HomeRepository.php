@@ -28,6 +28,24 @@ class HomeRepository extends AbstractRepository
      * @throws ReflectionException
      * @throws SelectError
      */
+    public function getByMeteringPointEan(string $meteringPointEan): Home
+    {
+        return $this->fetchOne(
+            '`metering_point_ean`=:meteringPointEan',
+            [
+                'meteringPointEan' => $meteringPointEan,
+            ],
+            Home::class,
+        );
+    }
+
+    /**
+     * @throws ClientException
+     * @throws JsonException
+     * @throws RecordException
+     * @throws ReflectionException
+     * @throws SelectError
+     */
     public function getById(string $accessToken, int $id): Home
     {
         return $this->fetchOne(

@@ -10,7 +10,9 @@ use GibsonOS\Core\Attribute\GetStore;
 use GibsonOS\Core\Controller\AbstractController;
 use GibsonOS\Core\Enum\Permission;
 use GibsonOS\Core\Model\Setting;
+use GibsonOS\Core\Model\User;
 use GibsonOS\Core\Repository\ModuleRepository;
+use GibsonOS\Core\Service\CryptService;
 use GibsonOS\Core\Service\Response\AjaxResponse;
 use GibsonOS\Core\Wrapper\ModelWrapper;
 use GibsonOS\Module\Zeus\Form\SettingsForm;
@@ -60,27 +62,65 @@ class IndexController extends AbstractController
         SettingsForm $settingsForm,
         #[GetSetting('tibberAccessToken', 'zeus')]
         ?Setting $tibberAccessToken,
+        #[GetSetting('inexogyEmail', 'zeus')]
+        ?Setting $inexogyEmail,
+        #[GetSetting('inexogyPassword', 'zeus')]
+        ?Setting $inexogyPassword,
     ): AjaxResponse {
-        return $this->returnSuccess($settingsForm->getForm($tibberAccessToken));
+        return $this->returnSuccess($settingsForm->getForm(
+            $tibberAccessToken,
+            $inexogyEmail,
+            $inexogyPassword,
+        ));
     }
 
     #[CheckPermission([Permission::WRITE])]
     public function postSettings(
         ModelWrapper $modelWrapper,
         ModuleRepository $moduleRepository,
+        CryptService $cryptService,
         string $tibberAccessToken,
+        string $inexogyEmail,
+        string $inexogyPassword,
         #[GetSetting('tibberAccessToken', 'zeus')]
         ?Setting $tibberAccessTokenSetting,
+        #[GetSetting('inexogyEmail', 'zeus')]
+        ?Setting $inexogyEmailSetting,
+        #[GetSetting('inexogyPassword', 'zeus')]
+        ?Setting $inexogyPasswordSetting,
+        User $permissionUser,
     ): AjaxResponse {
         if ($tibberAccessTokenSetting === null) {
             $tibberAccessTokenSetting = (new Setting($modelWrapper))
-                ->setKey('systemModel')
-                ->setModule($moduleRepository->getByName('marvin'))
+                ->setKey('tibberAccessToken')
+                ->setModule($moduleRepository->getByName('zeus'))
+                ->setUser($permissionUser)
             ;
         }
 
-        $tibberAccessTokenSetting->setValue($tibberAccessToken);
+        if ($inexogyEmailSetting === null) {
+            $inexogyEmailSetting = (new Setting($modelWrapper))
+                ->setKey('inexogyEmail')
+                ->setModule($moduleRepository->getByName('zeus'))
+                ->setUser($permissionUser)
+            ;
+        }
+
+        if ($inexogyPasswordSetting === null) {
+            $inexogyPasswordSetting = (new Setting($modelWrapper))
+                ->setKey('inexogyPassword')
+                ->setModule($moduleRepository->getByName('zeus'))
+                ->setUser($permissionUser)
+            ;
+        }
+
+        $tibberAccessTokenSetting->setValue($cryptService->encrypt($tibberAccessToken));
+        $inexogyEmailSetting->setValue($cryptService->encrypt($inexogyEmail));
+        $inexogyPasswordSetting->setValue($cryptService->encrypt($inexogyPassword));
+
         $modelWrapper->getModelManager()->saveWithoutChildren($tibberAccessTokenSetting);
+        $modelWrapper->getModelManager()->saveWithoutChildren($inexogyEmailSetting);
+        $modelWrapper->getModelManager()->saveWithoutChildren($inexogyPasswordSetting);
 
         return $this->returnSuccess();
     }
