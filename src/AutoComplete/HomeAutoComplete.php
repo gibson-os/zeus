@@ -7,6 +7,7 @@ use GibsonOS\Core\Attribute\GetSetting;
 use GibsonOS\Core\AutoComplete\AutoCompleteInterface;
 use GibsonOS\Core\Exception\Repository\SelectError;
 use GibsonOS\Core\Model\Setting;
+use GibsonOS\Core\Service\CryptService;
 use GibsonOS\Module\Zeus\Model\Home;
 use GibsonOS\Module\Zeus\Repository\HomeRepository;
 use JsonException;
@@ -19,6 +20,7 @@ class HomeAutoComplete implements AutoCompleteInterface
 {
     public function __construct(
         private readonly HomeRepository $homeRepository,
+        private readonly CryptService $cryptService,
         #[GetSetting('tibberAccessToken', 'zeus')]
         private readonly ?Setting $tibberAccessTokenSetting,
     ) {
@@ -39,7 +41,7 @@ class HomeAutoComplete implements AutoCompleteInterface
             return [];
         }
 
-        return $this->homeRepository->findByName($accessToken, $namePart);
+        return $this->homeRepository->findByName($this->cryptService->decrypt($accessToken), $namePart);
     }
 
     /**
@@ -58,7 +60,7 @@ class HomeAutoComplete implements AutoCompleteInterface
             throw new SelectError('No access token set');
         }
 
-        return $this->homeRepository->getById($accessToken, (int) $id);
+        return $this->homeRepository->getById($this->cryptService->decrypt($accessToken), (int) $id);
     }
 
     #[Override]
