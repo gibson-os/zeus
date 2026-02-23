@@ -21,9 +21,17 @@ class SettingsForm
         ?Setting $tibberAccessToken,
         ?Setting $inexogyEmail,
         ?Setting $inexogyPassword,
+        ?Setting $ecoflowAccessKey,
+        ?Setting $ecoflowAccessSecretKey,
     ): Form {
         return new Form(
-            $this->getFields($tibberAccessToken, $inexogyEmail, $inexogyPassword),
+            $this->getFields(
+                $tibberAccessToken,
+                $inexogyEmail,
+                $inexogyPassword,
+                $ecoflowAccessKey,
+                $ecoflowAccessSecretKey,
+            ),
             $this->getButtons(),
         );
     }
@@ -35,6 +43,8 @@ class SettingsForm
         ?Setting $tibberAccessTokenSetting,
         ?Setting $inexogyEmailSetting,
         ?Setting $inexogyPasswordSetting,
+        ?Setting $ecoflowAccessKeySetting,
+        ?Setting $ecoflowAccessSecretKeySetting,
     ): array {
         $tibberAccessToken = $tibberAccessTokenSetting?->getValue();
 
@@ -54,6 +64,18 @@ class SettingsForm
             $inexogyPassword = $this->cryptService->decrypt($inexogyPassword);
         }
 
+        $ecoflowAccessKey = $ecoflowAccessKeySetting?->getValue();
+
+        if ($ecoflowAccessKey !== null) {
+            $ecoflowAccessKey = $this->cryptService->decrypt($ecoflowAccessKey);
+        }
+
+        $ecoflowSecretKey = $ecoflowAccessSecretKeySetting?->getValue();
+
+        if ($ecoflowSecretKey !== null) {
+            $ecoflowSecretKey = $this->cryptService->decrypt($ecoflowSecretKey);
+        }
+
         return [
             'tibberAccessToken' => (new StringParameter('Tibber Access Token'))
                 ->setValue($tibberAccessToken),
@@ -61,6 +83,10 @@ class SettingsForm
                 ->setValue($inexogyEmail),
             'inexogyPassword' => (new StringParameter('Ineoxgy Password'))
                 ->setValue($inexogyPassword),
+            'ecoflowAccessKey' => (new StringParameter('Ecoflow Access Key'))
+                ->setValue($ecoflowAccessKey),
+            'ecoflowSecretKey' => (new StringParameter('Ecoflow Secret Key'))
+                ->setValue($ecoflowSecretKey),
         ];
     }
 
