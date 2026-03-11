@@ -5,7 +5,6 @@ namespace GibsonOS\Module\Zeus\Repository;
 
 use GibsonOS\Core\Exception\Repository\SelectError;
 use GibsonOS\Core\Repository\AbstractRepository;
-use GibsonOS\Core\Wrapper\RepositoryWrapper;
 use GibsonOS\Module\Zeus\Model\Home;
 use JsonException;
 use MDO\Enum\OrderDirection;
@@ -15,12 +14,6 @@ use ReflectionException;
 
 class HomeRepository extends AbstractRepository
 {
-    public function __construct(
-        RepositoryWrapper $repositoryWrapper,
-    ) {
-        parent::__construct($repositoryWrapper);
-    }
-
     /**
      * @throws ClientException
      * @throws JsonException

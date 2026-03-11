@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace GibsonOS\Module\Zeus\Command;
+namespace GibsonOS\Module\Zeus\Command\Collect;
 
 use GibsonOS\Core\Attribute\Command\Lock;
 use GibsonOS\Core\Attribute\Install\Cronjob;
@@ -26,7 +26,7 @@ use ReflectionException;
  */
 #[Lock('zeusCollectPrices')]
 #[Cronjob(minutes: '1,16,31,46', seconds: '21')]
-class CollectPricesCommand extends AbstractCommand
+class PricesCommand extends AbstractCommand
 {
     public function __construct(
         private readonly TibberPriceCollector $tibberPriceCollector,

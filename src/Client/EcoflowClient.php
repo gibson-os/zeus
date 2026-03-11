@@ -88,6 +88,7 @@ class EcoflowClient
 
         return new Request($url)
             ->setHeader('Accept', 'application/json;charset=UTF-8')
+            ->setHeader('Content-Type', 'application/json;charset=UTF-8')
             ->setHeader('accessKey', $accessKey)
             ->setHeader('nonce', $nonce)
             ->setHeader('timestamp', $timestamp)
@@ -122,13 +123,25 @@ class EcoflowClient
         string $timestamp,
     ): string {
         $parameters = $this->flatArrayParameter('', $parameters);
-        ksort($parameters);
+        ksort($parameters, SORT_STRING);
+
         $parameters['accessKey'] = $accessKey;
         $parameters['nonce'] = $nonce;
         $parameters['timestamp'] = $timestamp;
 
-        $paramString = http_build_query($parameters, '', '&', PHP_QUERY_RFC3986);
-        //        var_dump($paramString);
+        // $paramString = http_build_query($parameters, '', '&', PHP_QUERY_RFC3986);
+        $paramString = implode(
+            '&',
+            array_map(
+                static fn (string $key, string|int|float|bool $value): string => sprintf(
+                    '%s=%s',
+                    $key,
+                    is_bool($value) ? ($value ? 'true' : 'false') : (string) $value,
+                ),
+                array_keys($parameters),
+                array_values($parameters),
+            ),
+        );
 
         return bin2hex(hash_hmac('sha256', $paramString, $secretKey, true));
     }

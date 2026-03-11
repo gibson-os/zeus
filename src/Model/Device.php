@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace GibsonOS\Module\Zeus\Model;
 
 use GibsonOS\Core\Attribute\Install\Database\Column;
+use GibsonOS\Core\Attribute\Install\Database\Constraint;
 use GibsonOS\Core\Attribute\Install\Database\Key;
 use GibsonOS\Core\Attribute\Install\Database\Table;
 use GibsonOS\Core\Model\AbstractModel;
@@ -11,6 +12,10 @@ use GibsonOS\Core\Model\AutoCompleteModelInterface;
 use JsonSerializable;
 use Override;
 
+/**
+ * @method Home   getHome()
+ * @method Device setHome(Home $home)
+ */
 #[Table]
 #[Key(true, ['access_key', 'serial_number'])]
 class Device extends AbstractModel implements JsonSerializable, AutoCompleteModelInterface
@@ -29,6 +34,12 @@ class Device extends AbstractModel implements JsonSerializable, AutoCompleteMode
 
     #[Column]
     private bool $online = false;
+
+    #[Column(attributes: [Column::ATTRIBUTE_UNSIGNED])]
+    private ?int $homeId = null;
+
+    #[Constraint]
+    protected ?Home $home;
 
     public function getId(): ?int
     {
@@ -90,6 +101,18 @@ class Device extends AbstractModel implements JsonSerializable, AutoCompleteMode
         return $this;
     }
 
+    public function getHomeId(): ?int
+    {
+        return $this->homeId;
+    }
+
+    public function setHomeId(?int $homeId): Device
+    {
+        $this->homeId = $homeId;
+
+        return $this;
+    }
+
     #[Override]
     public function jsonSerialize(): array
     {
@@ -98,6 +121,7 @@ class Device extends AbstractModel implements JsonSerializable, AutoCompleteMode
             'serialNumber' => $this->getSerialNumber(),
             'deviceName' => $this->getDeviceName(),
             'online' => $this->isOnline(),
+            'homeId' => $this->getHomeId(),
         ];
     }
 

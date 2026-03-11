@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace GibsonOS\Module\Zeus\Command;
+namespace GibsonOS\Module\Zeus\Command\Collect;
 
 use GibsonOS\Core\Attribute\Install\Cronjob;
 use GibsonOS\Core\Command\AbstractCommand;
@@ -16,7 +16,7 @@ use Psr\Log\LoggerInterface;
 use ReflectionException;
 
 #[Cronjob(minutes: '1,16,31,46', seconds: '42')]
-class CollectEcoflowCommand extends AbstractCommand
+class DevicesCommand extends AbstractCommand
 {
     public function __construct(
         private readonly EcoflowMeasurementCollector $ecoflowMeasurementCollector,
@@ -55,7 +55,7 @@ class CollectEcoflowCommand extends AbstractCommand
                 continue;
             }
 
-            $this->ecoflowMeasurementCollector->collectMeasurement($accessKey, $secretKey);
+            $this->ecoflowMeasurementCollector->collectMeasurements($accessKey, $secretKey);
             $usedAccessKeys[] = $accessKey;
         }
 
