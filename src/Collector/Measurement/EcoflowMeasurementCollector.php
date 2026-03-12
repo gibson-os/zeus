@@ -83,7 +83,7 @@ class EcoflowMeasurementCollector
             } catch (SelectError) {
                 $from = $startedAt->setTime((int) $startedAt->format('H'), 0, 0);
                 $to = DateTime::createFromInterface($from);
-                $to->modify('+1 hour');
+                $to->setTime((int) $startedAt->format('H'), 59, 59);
             }
 
             $now = $this->dateTimeService->get();

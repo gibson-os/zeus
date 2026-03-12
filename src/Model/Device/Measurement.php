@@ -6,6 +6,7 @@ namespace GibsonOS\Module\Zeus\Model\Device;
 use DateTime;
 use GibsonOS\Core\Attribute\Install\Database\Column;
 use GibsonOS\Core\Attribute\Install\Database\Constraint;
+use GibsonOS\Core\Attribute\Install\Database\Key;
 use GibsonOS\Core\Attribute\Install\Database\Table;
 use GibsonOS\Core\Model\AbstractModel;
 use GibsonOS\Module\Zeus\Model\Device;
@@ -17,6 +18,8 @@ use Override;
  * @method Measurement setDevice(Device $device)
  */
 #[Table]
+#[Key(true, ['from', 'device_id'])]
+#[Key(true, ['to', 'device_id'])]
 class Measurement extends AbstractModel implements JsonSerializable
 {
     #[Column(attributes: [Column::ATTRIBUTE_UNSIGNED], autoIncrement: true)]
