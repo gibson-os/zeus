@@ -3,9 +3,13 @@ declare(strict_types=1);
 
 namespace GibsonOS\Module\Zeus\Collector\Measurement;
 
+use DateMalformedStringException;
 use DateTime;
 use DateTimeInterface;
+use GibsonOS\Core\Exception\CryptException;
+use GibsonOS\Core\Exception\Model\SaveError;
 use GibsonOS\Core\Exception\Repository\SelectError;
+use GibsonOS\Core\Exception\ViolationException;
 use GibsonOS\Core\Service\CryptService;
 use GibsonOS\Core\Service\DateTimeService;
 use GibsonOS\Core\Wrapper\ModelWrapper;
@@ -15,6 +19,11 @@ use GibsonOS\Module\Zeus\Exception\CollectException;
 use GibsonOS\Module\Zeus\Model\Device;
 use GibsonOS\Module\Zeus\Model\Device\Measurement;
 use GibsonOS\Module\Zeus\Repository\Device\MeasurementRepository;
+use GibsonOS\Module\Zeus\Repository\DeviceRepository;
+use JsonException;
+use MDO\Exception\ClientException;
+use MDO\Exception\RecordException;
+use ReflectionException;
 
 class EcoflowMeasurementCollector
 {
@@ -22,11 +31,22 @@ class EcoflowMeasurementCollector
         private readonly EcoflowClient $ecoflowClient,
         private readonly CryptService $cryptService,
         private readonly ModelWrapper $modelWrapper,
+        private readonly DeviceRepository $deviceRepository,
         private readonly MeasurementRepository $measurementRepository,
         private readonly DateTimeService $dateTimeService,
     ) {
     }
 
+    /**
+     * @throws DateMalformedStringException
+     * @throws CryptException
+     * @throws SaveError
+     * @throws ViolationException
+     * @throws JsonException
+     * @throws ClientException
+     * @throws RecordException
+     * @throws ReflectionException
+     */
     public function collectMeasurements(string $cryptedAccessKey, string $cryptedSecretKey): void
     {
         $accessKey = $this->cryptService->decrypt($cryptedAccessKey);
@@ -35,11 +55,19 @@ class EcoflowMeasurementCollector
         $devices = $this->ecoflowClient->getDeviceList($accessKey, $secretKey);
 
         foreach ($devices as $device) {
-            $deviceModel = new Device($this->modelWrapper)
-                ->setAccessKey($accessKey)
-                ->setSerialNumber($device['sn'])
+            try {
+                $deviceModel = $this->deviceRepository->getBySerialNumber($device['sn'], $accessKey);
+            } catch (SelectError) {
+                $deviceModel = new Device($this->modelWrapper)
+                    ->setAccessKey($accessKey)
+                    ->setSerialNumber($device['sn'])
+                ;
+            }
+
+            $deviceModel
                 ->setDeviceName($device['deviceName'])
-                ->setOnline((bool) $device['online']);
+                ->setOnline((bool) $device['online'])
+            ;
 
             $this->modelWrapper->getModelManager()->saveWithoutChildren($deviceModel);
             $startedAt = $deviceModel->getStartedAt();
