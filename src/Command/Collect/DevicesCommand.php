@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace GibsonOS\Module\Zeus\Command\Collect;
 
+use GibsonOS\Core\Attribute\Command\Lock;
 use GibsonOS\Core\Attribute\Install\Cronjob;
 use GibsonOS\Core\Command\AbstractCommand;
 use GibsonOS\Core\Model\Setting;
@@ -15,7 +16,8 @@ use Override;
 use Psr\Log\LoggerInterface;
 use ReflectionException;
 
-#[Cronjob(minutes: '1,16,31,46', seconds: '42')]
+#[Lock('zeusCollectDevices')]
+#[Cronjob(minutes: '1,16,31,46', seconds: '0')]
 class DevicesCommand extends AbstractCommand
 {
     public function __construct(

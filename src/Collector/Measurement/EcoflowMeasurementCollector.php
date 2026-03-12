@@ -163,12 +163,12 @@ class EcoflowMeasurementCollector
 
         foreach ($gridEnergy['data']['data'] as $gridEnergyData) {
             switch ($gridEnergyData['extra']) {
-                case '0':
-                    $gridConsumption = (int) $gridEnergyData['indexValue'];
+                case '2':
+                    $gridFeedIn = (int) $gridEnergyData['indexValue'];
 
                     break;
-                case '1':
-                    $gridFeedIn = (int) $gridEnergyData['indexValue'];
+                default:
+                    $gridConsumption = (int) $gridEnergyData['indexValue'];
 
                     break;
             }
@@ -209,12 +209,12 @@ class EcoflowMeasurementCollector
 
         foreach ($socEnergy['data']['data'] as $socEnergyData) {
             switch ($socEnergyData['extra']) {
-                case '0':
-                    $socConsumption = (int) $socEnergyData['indexValue'];
+                case '2':
+                    $socFeedIn = (int) $socEnergyData['indexValue'];
 
                     break;
-                case '1':
-                    $socFeedIn = (int) $socEnergyData['indexValue'];
+                default:
+                    $socConsumption = (int) $socEnergyData['indexValue'];
 
                     break;
             }

@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace GibsonOS\Module\Zeus\Command\Collect;
 
+use GibsonOS\Core\Attribute\Command\Lock;
 use GibsonOS\Core\Attribute\Install\Cronjob;
 use GibsonOS\Core\Command\AbstractCommand;
 use GibsonOS\Core\Exception\Model\SaveError;
@@ -18,6 +19,7 @@ use Override;
 use Psr\Log\LoggerInterface;
 use ReflectionException;
 
+#[Lock('zeusCollectConsumption')]
 #[Cronjob(minutes: '1,16,31,46', seconds: '42')]
 class ConsumptionCommand extends AbstractCommand
 {
