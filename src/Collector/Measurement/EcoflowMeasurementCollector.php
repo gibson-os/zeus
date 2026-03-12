@@ -4,7 +4,6 @@ declare(strict_types=1);
 namespace GibsonOS\Module\Zeus\Collector\Measurement;
 
 use DateTime;
-use DateTimeImmutable;
 use DateTimeInterface;
 use GibsonOS\Core\Exception\Repository\SelectError;
 use GibsonOS\Core\Service\CryptService;
@@ -36,9 +35,6 @@ class EcoflowMeasurementCollector
         $devices = $this->ecoflowClient->getDeviceList($accessKey, $secretKey);
 
         foreach ($devices as $device) {
-            $from = new DateTimeImmutable('2026-03-11 12:00:00');
-            $to = new DateTimeImmutable('2026-03-11 12:59:59');
-
             $deviceModel = new Device($this->modelWrapper)
                 ->setAccessKey($accessKey)
                 ->setSerialNumber($device['sn'])
@@ -46,40 +42,33 @@ class EcoflowMeasurementCollector
                 ->setOnline((bool) $device['online']);
 
             $this->modelWrapper->getModelManager()->saveWithoutChildren($deviceModel);
+            $startedAt = $deviceModel->getStartedAt();
+
+            if ($startedAt === null) {
+                continue;
+            }
 
             try {
                 $lastMeasurement = $this->measurementRepository->getLastByDevice($deviceModel);
                 $from = $lastMeasurement->getFrom()->modify('+1 hour');
                 $to = $lastMeasurement->getTo()->modify('+1 hour');
-                $now = $this->dateTimeService->get();
-
-                while ($to < $now) {
-                    try {
-                        $this->collectMeasurement($accessKey, $secretKey, $deviceModel, $from, $to);
-                    } catch (CollectException) {
-                        continue 2;
-                    }
-
-                    $from->modify('+1 hour');
-                    $to->modify('+1 hour');
-                }
             } catch (SelectError) {
-                $from = $this->dateTimeService->get();
-                $to = $this->dateTimeService->get();
-                $from->modify('-1 hour')->setTime((int) $from->format('H'), 0, 0);
-                $to->modify('-1 hour')->setTime((int) $to->format('H'), 59, 59);
+                $from = $startedAt->setTime((int) $startedAt->format('H'), 0, 0);
+                $to = DateTime::createFromInterface($from);
+                $to->modify('+1 hour');
+            }
 
-                while (true) {
-                    try {
-                        $this->collectMeasurement($accessKey, $secretKey, $deviceModel, $from, $to);
-                    } catch (CollectException) {
-                        continue 2;
-                    }
+            $now = $this->dateTimeService->get();
 
-                    $from->modify('-1 hour');
-                    $to->modify('-1 hour');
+            while ($to < $now) {
+                try {
+                    $this->collectMeasurement($accessKey, $secretKey, $deviceModel, $from, $to);
+                } catch (CollectException) {
+                    continue 2;
                 }
-                // Revert collect bis keine Daten mehr kommen
+
+                $from->modify('+1 hour');
+                $to->modify('+1 hour');
             }
         }
     }

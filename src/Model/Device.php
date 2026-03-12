@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace GibsonOS\Module\Zeus\Model;
 
+use DateTime;
 use GibsonOS\Core\Attribute\Install\Database\Column;
 use GibsonOS\Core\Attribute\Install\Database\Constraint;
 use GibsonOS\Core\Attribute\Install\Database\Key;
@@ -34,6 +35,9 @@ class Device extends AbstractModel implements JsonSerializable, AutoCompleteMode
 
     #[Column]
     private bool $online = false;
+
+    #[Column]
+    private ?DateTime $startedAt = null;
 
     #[Column(attributes: [Column::ATTRIBUTE_UNSIGNED])]
     private ?int $homeId = null;
@@ -113,6 +117,18 @@ class Device extends AbstractModel implements JsonSerializable, AutoCompleteMode
         return $this;
     }
 
+    public function getStartedAt(): ?DateTime
+    {
+        return $this->startedAt;
+    }
+
+    public function setStartedAt(?DateTime $startedAt): Device
+    {
+        $this->startedAt = $startedAt;
+
+        return $this;
+    }
+
     #[Override]
     public function jsonSerialize(): array
     {
@@ -122,6 +138,7 @@ class Device extends AbstractModel implements JsonSerializable, AutoCompleteMode
             'deviceName' => $this->getDeviceName(),
             'online' => $this->isOnline(),
             'homeId' => $this->getHomeId(),
+            'startedAt' => $this->getStartedAt(),
         ];
     }
 
