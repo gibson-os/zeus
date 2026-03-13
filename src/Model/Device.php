@@ -14,8 +14,11 @@ use JsonSerializable;
 use Override;
 
 /**
- * @method Home   getHome()
- * @method Device setHome(Home $home)
+ * @method Home                 getHome()
+ * @method Device               setHome(Home $home)
+ * @method Device\Measurement[] getMeasurements()
+ * @method Device               setMeasurements(Device\Measurement[] $measurements)
+ * @method Device               addMeasurements(Device\Measurement[] $measurements)
  */
 #[Table]
 #[Key(true, ['access_key', 'serial_number'])]
@@ -44,6 +47,9 @@ class Device extends AbstractModel implements JsonSerializable, AutoCompleteMode
 
     #[Constraint]
     protected ?Home $home;
+
+    #[Constraint('device', Device\Measurement::class)]
+    protected array $measurements = [];
 
     public function getId(): ?int
     {

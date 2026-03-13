@@ -78,8 +78,8 @@ class EcoflowMeasurementCollector
 
             try {
                 $lastMeasurement = $this->measurementRepository->getLastByDevice($deviceModel);
-                $from = $lastMeasurement->getFrom()->modify('+1 hour');
-                $to = $lastMeasurement->getTo()->modify('+1 hour');
+                $from = $lastMeasurement->getFrom()->modify('-1 day');
+                $to = $lastMeasurement->getTo()->modify('-1 day');
             } catch (SelectError) {
                 $from = $startedAt->setTime((int) $startedAt->format('H'), 0, 0);
                 $to = DateTime::createFromInterface($from);
@@ -88,7 +88,7 @@ class EcoflowMeasurementCollector
 
             $now = $this->dateTimeService->get();
 
-            while ($to < $now) {
+            while ($from < $now) {
                 try {
                     $this->collectMeasurement($accessKey, $secretKey, $deviceModel, $from, $to);
                 } catch (CollectException) {
@@ -120,6 +120,7 @@ class EcoflowMeasurementCollector
         $this->collectDeviceEnergy($accessKey, $secretKey, $device, $from, $to, $measurement);
         $this->collectGridEnergy($accessKey, $secretKey, $device, $from, $to, $measurement);
         $this->collectSocEnergy($accessKey, $secretKey, $device, $from, $to, $measurement);
+        $this->calculatePvGeneration($measurement);
 
         $this->modelWrapper->getModelManager()->saveWithoutChildren($measurement);
     }
@@ -240,6 +241,25 @@ class EcoflowMeasurementCollector
         $measurement
             ->setBatteryConsumption($socConsumption)
             ->setBatteryFeedIn($socFeedIn)
+        ;
+    }
+
+    private function calculatePvGeneration(Measurement $measurement): void
+    {
+        $pvGeneration = max(
+            ($measurement->getDeviceConsumption() + $measurement->getBatteryConsumption() + $measurement->getGridFeedIn()) -
+            $measurement->getGridConsumption() - $measurement->getBatteryFeedIn(),
+            0,
+        );
+        $pvToBattery = min($measurement->getBatteryConsumption(), max($pvGeneration - $measurement->getDeviceConsumption(), 0));
+        $pvToDevice = min($measurement->getDeviceConsumption(), max($pvGeneration - $pvToBattery, 0));
+        $pvToGrid = max($pvGeneration - $pvToBattery - $pvToDevice, 0);
+
+        $measurement
+            ->setPvGeneration($pvGeneration)
+            ->setPvToBattery($pvToBattery)
+            ->setPvToDevice($pvToGrid)
+            ->setPvToGrid($pvToGrid)
         ;
     }
 }

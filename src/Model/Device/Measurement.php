@@ -49,6 +49,18 @@ class Measurement extends AbstractModel implements JsonSerializable
     #[Column(attributes: [Column::ATTRIBUTE_UNSIGNED])]
     private int $batteryFeedIn;
 
+    #[Column(attributes: [Column::ATTRIBUTE_UNSIGNED])]
+    private int $pvGeneration;
+
+    #[Column(attributes: [Column::ATTRIBUTE_UNSIGNED])]
+    private int $pvToBattery;
+
+    #[Column(attributes: [Column::ATTRIBUTE_UNSIGNED])]
+    private int $pvToDevice;
+
+    #[Column(attributes: [Column::ATTRIBUTE_UNSIGNED])]
+    private int $pvToGrid;
+
     #[Constraint]
     protected Device $device;
 
@@ -160,6 +172,54 @@ class Measurement extends AbstractModel implements JsonSerializable
         return $this;
     }
 
+    public function getPvGeneration(): int
+    {
+        return $this->pvGeneration;
+    }
+
+    public function setPvGeneration(int $pvGeneration): Measurement
+    {
+        $this->pvGeneration = $pvGeneration;
+
+        return $this;
+    }
+
+    public function getPvToBattery(): int
+    {
+        return $this->pvToBattery;
+    }
+
+    public function setPvToBattery(int $pvToBattery): Measurement
+    {
+        $this->pvToBattery = $pvToBattery;
+
+        return $this;
+    }
+
+    public function getPvToDevice(): int
+    {
+        return $this->pvToDevice;
+    }
+
+    public function setPvToDevice(int $pvToDevice): Measurement
+    {
+        $this->pvToDevice = $pvToDevice;
+
+        return $this;
+    }
+
+    public function getPvToGrid(): int
+    {
+        return $this->pvToGrid;
+    }
+
+    public function setPvToGrid(int $pvToGrid): Measurement
+    {
+        $this->pvToGrid = $pvToGrid;
+
+        return $this;
+    }
+
     #[Override]
     public function jsonSerialize(): array
     {
@@ -171,6 +231,9 @@ class Measurement extends AbstractModel implements JsonSerializable
             'gridFeedIn' => $this->getGridFeedIn(),
             'batteryConsumption' => $this->getBatteryConsumption(),
             'batteryFeedIn' => $this->getBatteryFeedIn(),
+            'pvGeneration' => $this->getPvGeneration(),
+            'pvToBattery' => $this->getPvToBattery(),
+            'pvToGrid' => $this->getPvToGrid(),
             'from' => $this->getFrom()->format('Y-m-d H:i:s'),
             'to' => $this->getTo()->format('Y-m-d H:i:s'),
         ];
