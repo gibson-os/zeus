@@ -258,7 +258,7 @@ class EcoflowMeasurementCollector
         $measurement
             ->setPvGeneration($pvGeneration)
             ->setPvToBattery($pvToBattery)
-            ->setPvToDevice($pvToGrid)
+            ->setPvToDevice($pvToDevice)
             ->setPvToGrid($pvToGrid)
         ;
     }
